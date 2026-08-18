@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IBIT - Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="/assets/js/sanitize.js"></script>
+    <style>
+        .ql-toolbar button:hover::after, .ql-toolbar .ql-picker:hover::after {
+            content: attr(title); position: absolute; top: -25px; left: 50%; transform: translateX(-50%);
+            background: #111827; color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; white-space: nowrap; z-index: 10; pointer-events: none;
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.6; transition: 0.2s; }
+        input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans h-screen flex flex-col" onclick="closeAllDropdowns()">
+
+    <header class="bg-[#1a0b5e] text-white py-4 px-6 shadow-md z-20 flex justify-between items-center hidden" id="top-header">
+        <div class="flex items-center gap-4">
+            <button type="button" onclick="toggleSidebar()" class="text-white hover:text-blue-300 focus:outline-none p-1 transition transform hover:scale-110">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+            <img src="/assets/logo.jpeg" class="w-10 h-10 rounded-full border-2 border-white shadow-sm" alt="IBIT Logo" onerror="this.src='https://via.placeholder.com/40'">
+            <div>
+                <h1 class="text-xl font-black uppercase tracking-wider hidden sm:block">IBIT-ISLAMI BANK INSTITUTE OF TECHNOLOGY, SYLHET</h1>
+                <p class="text-xs text-blue-200">Admin Control Panel</p>
+            </div>
+        </div>
+    </header>
+
+    <div id="login-screen" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md text-center relative">
+            <img src="/assets/logo.jpeg" class="w-24 h-24 mx-auto rounded-full mb-4 border-4 border-slate-100 shadow-sm" alt="Logo" onerror="this.src='https://via.placeholder.com/100'">
+            <h2 class="text-2xl font-black text-[#1a0b5e] mb-6 uppercase">Admin Login</h2>
+            
+            <input type="text" id="username" placeholder="Username" class="w-full px-4 py-3 border border-slate-300 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-[#1a0b5e]">
+            
+            <div class="relative mb-6">
+                <input type="password" id="password" placeholder="Password" class="w-full px-4 py-3 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-[#1a0b5e]">
+                <button type="button" onclick="togglePassword()" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-[#1a0b5e] focus:outline-none">
+                    <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                </button>
+            </div>
+            <!--
+                Optional CAPTCHA (Cloudflare Turnstile).
+                To enable: add <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+                to <head>, set data-sitekey below to your Turnstile site key, and set the
+                TURNSTILE_SECRET_KEY environment variable on the Pages project. Until a
+                sitekey is set, this renders nothing and /api/auth skips verification.
+            -->
+            <div class="cf-turnstile mb-4" data-sitekey="" id="turnstile-widget"></div>
+
+            <button type="button" onclick="login()" id="login-btn" class="w-full bg-[#1a0b5e] text-white py-3 rounded font-bold hover:bg-blue-900 transition shadow-lg">LOGIN</button>
+            <p id="login-error" class="text-red-500 mt-3 font-bold hidden">Invalid ID or Password</p>
+        </div>
+    </div>
+
+    <div class="flex flex-grow overflow-hidden relative">
+        
+        <aside class="w-64 bg-slate-900 text-white flex-col shadow-xl z-10 justify-between hidden transition-all duration-300" id="sidebar">
+            <nav class="p-4 space-y-2 mt-4">
+                <button type="button" onclick="showDashboard()" id="nav-dash" class="w-full text-left px-4 py-3 rounded text-sm font-bold bg-blue-700 text-white transition shadow">Dashboard</button>
+                <button type="button" onclick="showNoticePanel()" id="nav-notice" class="w-full text-left px-4 py-3 hover:bg-slate-800 rounded text-sm font-bold text-slate-300 transition">Notice Board</button>
+            </nav>
+            <div class="p-4 border-t border-slate-800">
+                <button type="button" onclick="logout()" class="w-full flex justify-center items-center gap-2 text-red-400 font-bold hover:text-red-300 hover:bg-slate-800 py-3 rounded transition">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg> Logout
+                </button>
+            </div>
+        </aside>
+
+        <main class="flex-grow p-4 sm:p-8 overflow-y-auto hidden bg-slate-50 w-full" id="main-content">
+            
+            <div id="dashboard-view">
+                <div class="bg-white p-10 rounded-xl shadow-sm border border-slate-200 text-center mt-10">
+                    <h2 class="text-3xl font-black text-[#1a0b5e] mb-2 uppercase">Welcome to IBIT Admin Panel</h2>
+                    <p class="text-slate-500">Select an option from the sidebar to manage website content.</p>
+                </div>
+            </div>
+
+            <div id="notice-panel-view" class="hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-2xl font-bold text-slate-800">Notice Management</h1>
+                    <button type="button" onclick="showEditor()" class="bg-[#1a0b5e] hover:bg-blue-900 text-white px-5 py-2.5 rounded font-bold transition shadow text-sm flex items-center gap-2">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Create Notice
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 pb-20 overflow-x-auto">
+                    <table class="w-full text-left border-collapse min-w-[600px]">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-600 text-sm uppercase border-b border-slate-200">
+                                <th class="p-4 font-bold">Notice Title</th>
+                                <th class="p-4 font-bold w-40">Status/Timer</th>
+                                <th class="p-4 font-bold w-16 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-notices" class="divide-y divide-slate-100"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="notice-editor-view" class="hidden bg-white rounded-xl shadow-sm border border-slate-200 p-8 max-w-5xl mx-auto">
+                <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
+                    <h2 id="editor-title" class="text-2xl font-black text-[#1a0b5e] uppercase">Create Notice</h2>
+                    <button type="button" id="preview-btn" onclick="previewNotice()" class="hidden px-5 py-2 bg-blue-50 text-blue-800 border border-blue-200 rounded font-bold hover:bg-blue-100 transition items-center gap-2 shadow-sm text-sm">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg> Preview
+                    </button>
+                </div>
+
+                <input type="hidden" id="edit-id">
+                
+                <label class="font-bold text-slate-700 text-sm mb-1 block">Notice Title</label>
+                <input type="text" id="n-title" class="w-full px-4 py-3 border border-slate-300 rounded mb-6 text-lg font-bold focus:border-[#1a0b5e] focus:outline-none" placeholder="Enter title...">
+                
+                <div class="mb-6">
+                    <label class="font-bold text-slate-700 text-sm mb-2 block">Choose Input Format</label>
+                    <div class="inline-flex bg-slate-100 p-1 rounded-lg border border-slate-200">
+                        <button type="button" onclick="setFormat('visual')" id="fmt-visual" class="px-6 py-2 rounded-md text-sm font-bold bg-white shadow text-[#1a0b5e] transition">Visual Editor</button>
+                        <button type="button" onclick="setFormat('html')" id="fmt-html" class="px-6 py-2 rounded-md text-sm font-bold text-slate-500 hover:text-slate-800 transition">Custom HTML</button>
+                        <button type="button" onclick="setFormat('pdf')" id="fmt-pdf" class="px-6 py-2 rounded-md text-sm font-bold text-slate-500 hover:text-slate-800 transition">Upload PDF</button>
+                    </div>
+                </div>
+                
+                <div id="container-visual" class="mb-6 border border-slate-300 rounded">
+                    <div id="quill-editor" class="h-64 bg-white"></div>
+                </div>
+                <div id="container-html" class="mb-6 hidden">
+                    <textarea id="html-editor" oninput="checkPreviewVisibility()" class="w-full h-72 p-4 border border-slate-300 rounded font-mono text-sm focus:border-[#1a0b5e] focus:outline-none bg-slate-900 text-green-400" placeholder="Paste your HTML code here..."></textarea>
+                </div>
+                <div id="container-pdf" class="mb-6 hidden bg-slate-50 p-6 border border-slate-300 rounded border-dashed text-center">
+                    <label class="font-bold text-slate-700 block mb-2 text-lg">Select PDF File</label>
+                    <input type="file" id="pdf-upload" accept="application/pdf" class="mx-auto text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-bold file:bg-[#1a0b5e] file:text-white hover:file:bg-blue-800 transition cursor-pointer">
+                </div>
+
+                <div class="bg-blue-50 p-5 border border-blue-100 rounded-lg mb-8">
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" id="auto-delete" class="w-4 h-4 cursor-pointer" onchange="document.getElementById('editor-timer-box').classList.toggle('hidden')">
+                        <label for="auto-delete" class="font-bold text-sm text-[#1a0b5e] cursor-pointer">Set Auto-Delete Timer</label>
+                    </div>
+                    <div id="editor-timer-box" class="hidden flex-col sm:flex-row sm:items-center gap-4 mt-4 p-4 bg-white border border-blue-200 rounded">
+                        <div class="flex flex-col">
+                            <label class="text-xs font-bold text-slate-500 mb-1">Select Date</label>
+                            <input type="date" id="ed-date" class="border border-slate-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#1a0b5e] font-bold text-slate-700">
+                        </div>
+                        <div class="flex flex-col">
+                            <label class="text-xs font-bold text-slate-500 mb-1">Time (Hr:Min:Sec)</label>
+                            <div class="flex items-center gap-1 border border-slate-300 rounded px-2 py-1.5 bg-white shadow-sm">
+                                <select id="ed-hour" class="time-hour appearance-none bg-transparent focus:outline-none text-sm font-bold text-slate-700 text-center w-8 cursor-pointer"></select>
+                                <span class="font-bold text-slate-400">:</span>
+                                <select id="ed-min" class="time-min appearance-none bg-transparent focus:outline-none text-sm font-bold text-slate-700 text-center w-8 cursor-pointer"></select>
+                                <span class="font-bold text-slate-400">:</span>
+                                <select id="ed-sec" class="time-sec appearance-none bg-transparent focus:outline-none text-sm font-bold text-slate-700 text-center w-8 cursor-pointer"></select>
+                            </div>
+                        </div>
+                        <div class="flex flex-col">
+                            <label class="text-xs font-bold text-slate-500 mb-1">AM/PM</label>
+                            <button type="button" id="ed-ampm" onclick="toggleAMPM(this)" class="bg-[#1a0b5e] text-white px-4 py-1.5 rounded text-sm font-bold w-14 text-center transition hover:bg-blue-900 shadow border border-[#1a0b5e]">AM</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
+                    <button type="button" onclick="showNoticePanel()" class="px-8 py-3 border border-slate-300 rounded font-bold hover:bg-slate-100 text-slate-600 transition">Cancel</button>
+                    <button type="button" onclick="saveNotice()" id="publish-btn" class="px-8 py-3 bg-green-600 text-white rounded font-bold hover:bg-green-700 transition shadow-lg">Publish Notice</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="preview-modal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-70 z-[100] flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col relative overflow-hidden">
+            <div class="bg-slate-100 p-5 border-b border-slate-200 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <span class="bg-blue-600 text-white text-xs px-2 py-1 rounded font-bold uppercase tracking-wider">Live Preview</span>
+                    <h2 id="preview-title" class="text-xl font-bold text-[#1a0b5e]"></h2>
+                </div>
+                <button type="button" onclick="closePreview()" class="text-slate-400 hover:text-red-500 font-bold text-3xl leading-none">&times;</button>
+            </div>
+            <div id="preview-content" class="p-6 overflow-y-auto prose max-w-none text-slate-700 text-justify"></div>
+            <div class="p-4 border-t border-slate-200 bg-slate-50 flex justify-end">
+                <button type="button" onclick="closePreview()" class="px-6 py-2 bg-[#1a0b5e] text-white rounded font-bold hover:bg-blue-900 transition shadow">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="delete-modal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-60 z-[60] flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-2xl p-6 w-full max-w-sm text-center">
+            <h3 class="text-xl font-bold text-slate-800 mb-2">Delete Notice?</h3>
+            <p class="text-sm text-slate-500 mb-6">This action cannot be undone.</p>
+            <input type="hidden" id="delete-id">
+            <div class="flex justify-center gap-3">
+                <button type="button" onclick="closeModals()" class="px-4 py-2 bg-slate-200 text-slate-700 font-bold rounded">Cancel</button>
+                <button type="button" onclick="confirmDelete()" id="confirm-del-btn" class="px-4 py-2 bg-red-600 text-white font-bold rounded hover:bg-red-700">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="timer-modal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-60 z-[60] flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-2xl p-6 w-full max-w-sm border-t-4 border-[#1a0b5e]">
+            <h3 class="text-lg font-bold text-[#1a0b5e] mb-1">Set Auto-Delete Timer</h3>
+            <p class="text-xs text-slate-500 mb-5">Notice will be deleted exactly at this time.</p>
+            <input type="hidden" id="timer-id">
+            <div class="flex flex-col gap-4 bg-slate-50 p-4 border border-slate-200 rounded-lg mb-6">
+                <div class="flex flex-col">
+                    <label class="text-xs font-bold text-slate-500 mb-1">Select Date</label>
+                    <input type="date" id="qt-date" class="border border-slate-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#1a0b5e] font-bold text-slate-700">
+                </div>
+                <div class="flex items-end gap-3">
+                    <div class="flex flex-col flex-grow">
+                        <label class="text-xs font-bold text-slate-500 mb-1">Time (Hr:Min:Sec)</label>
+                        <div class="flex items-center gap-1 border border-slate-300 rounded px-2 py-1.5 bg-white shadow-sm">
+                            <select id="qt-hour" class="time-hour appearance-none bg-transparent focus:outline-none text-sm font-bold text-slate-700 text-center w-8 cursor-pointer"></select>
+                            <span class="font-bold text-slate-400">:</span>
+                            <select id="qt-min" class="time-min appearance-none bg-transparent focus:outline-none text-sm font-bold text-slate-700 text-center w-8 cursor-pointer"></select>
+                            <span class="font-bold text-slate-400">:</span>
+                            <select id="qt-sec" class="time-sec appearance-none bg-transparent focus:outline-none text-sm font-bold text-slate-700 text-center w-8 cursor-pointer"></select>
+                        </div>
+                    </div>
+                    <button type="button" id="qt-ampm" onclick="toggleAMPM(this)" class="bg-[#1a0b5e] text-white px-4 py-1.5 rounded text-sm font-bold w-14 text-center transition hover:bg-blue-900 shadow border border-[#1a0b5e] h-[34px]">AM</button>
+                </div>
+            </div>
+            <div class="flex justify-between items-center">
+                <button type="button" onclick="clearQuickTimer()" class="text-xs text-red-500 font-bold hover:underline">Turn Off Timer</button>
+                <div class="flex gap-2">
+                    <button type="button" onclick="closeModals()" class="px-4 py-2 bg-slate-200 text-slate-700 font-bold rounded text-sm hover:bg-slate-300 transition">Cancel</button>
+                    <button type="button" onclick="saveQuickTimer()" id="save-timer-btn" class="px-4 py-2 bg-[#1a0b5e] text-white font-bold rounded text-sm hover:bg-blue-900 transition shadow">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script>
+        let noticeData = [];
+        let currentFormat = 'visual';
+
+        window.onload = () => {
+            let hrs = '', mins = '';
+            for(let i=1; i<=12; i++) hrs += `<option value="${i}">${i.toString().padStart(2,'0')}</option>`;
+            for(let i=0; i<60; i++) mins += `<option value="${i}">${i.toString().padStart(2,'0')}</option>`;
+            document.querySelectorAll('.time-hour').forEach(el => el.innerHTML = hrs);
+            document.querySelectorAll('.time-min, .time-sec').forEach(el => el.innerHTML = mins);
+        };
+
+        // 🔴 বাগ ফিক্সড: হ্যামবার্গার টগল ফাংশন 🔴
+        function toggleSidebar() {
+            const sb = document.getElementById('sidebar');
+            if (sb.classList.contains('hidden')) {
+                sb.classList.remove('hidden');
+                sb.classList.add('flex');
+            } else {
+                sb.classList.remove('flex');
+                sb.classList.add('hidden');
+            }
+        }
+
+        function toggleAMPM(btn) { btn.innerText = btn.innerText === 'AM' ? 'PM' : 'AM'; }
+
+        function checkPreviewVisibility() {
+            const btn = document.getElementById('preview-btn');
+            if (currentFormat === 'pdf') {
+                btn.classList.add('hidden'); btn.classList.remove('flex'); return;
+            }
+            let hasContent = false;
+            if (currentFormat === 'visual') hasContent = quill.getText().trim().length > 0;
+            else if (currentFormat === 'html') hasContent = document.getElementById('html-editor').value.trim().length > 0;
+            
+            if (hasContent) { btn.classList.remove('hidden'); btn.classList.add('flex'); } 
+            else { btn.classList.add('hidden'); btn.classList.remove('flex'); }
+        }
+
+        function getTimerISO(prefix) {
+            const d = document.getElementById(prefix + '-date').value;
+            if(!d) return null;
+            let h = parseInt(document.getElementById(prefix + '-hour').value);
+            const m = document.getElementById(prefix + '-min').value;
+            const s = document.getElementById(prefix + '-sec').value;
+            const ampm = document.getElementById(prefix + '-ampm').innerText;
+
+            if(ampm === 'PM' && h < 12) h += 12;
+            if(ampm === 'AM' && h === 12) h = 0;
+            const hh = h.toString().padStart(2, '0');
+            const mm = m.toString().padStart(2, '0');
+            const ss = s.toString().padStart(2, '0');
+            const dateObj = new Date(`${d}T${hh}:${mm}:${ss}`);
+            return isNaN(dateObj.getTime()) ? null : dateObj.toISOString();
+        }
+
+        function setTimerUI(prefix, isoString) {
+            if(!isoString) {
+                document.getElementById(prefix + '-date').value = '';
+                document.getElementById(prefix + '-hour').value = '1';
+                document.getElementById(prefix + '-min').value = '0';
+                document.getElementById(prefix + '-sec').value = '0';
+                document.getElementById(prefix + '-ampm').innerText = 'AM';
+                return;
+            }
+            const d = new Date(isoString);
+            document.getElementById(prefix + '-date').value = `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')}`;
+            let h = d.getHours();
+            const ampm = h >= 12 ? 'PM' : 'AM';
+            if(h > 12) h -= 12; if(h === 0) h = 12;
+            document.getElementById(prefix + '-hour').value = h;
+            document.getElementById(prefix + '-min').value = d.getMinutes();
+            document.getElementById(prefix + '-sec').value = d.getSeconds();
+            document.getElementById(prefix + '-ampm').innerText = ampm;
+        }
+        
+        // Fix: the old code read document.cookie directly, which meant
+        // anyone could type `document.cookie = "admin_auth=true"` in the
+        // console and unlock the UI themselves. The session cookie is
+        // HttpOnly now (not readable/writable from JS at all), so instead
+        // we ask the server whether the current request actually carries a
+        // valid, signed-in session.
+        (async function checkExistingSession() {
+            try {
+                const res = await fetch('/api/session');
+                const data = await res.json();
+                if (data.authenticated) unlockUI();
+            } catch (e) { /* not logged in / network error -> stay on login screen */ }
+        })();
+
+        var quill = new Quill('#quill-editor', {
+            theme: 'snow',
+            modules: { toolbar: [ [{ 'header': [1,2,3,false] }], ['bold', 'italic', 'underline', 'strike'], [{'color':[]}, {'background':[]}], [{ 'list': 'ordered'}, { 'list': 'bullet' }], [{ 'align': [] }], ['link', 'image', 'video'], ['clean'] ] }
+        });
+        quill.on('text-change', function() { checkPreviewVisibility(); });
+
+        function togglePassword() {
+            const pwd = document.getElementById('password');
+            const icon = document.getElementById('eye-icon');
+            if(pwd.type === 'password') {
+                pwd.type = 'text';
+                icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+            } else {
+                pwd.type = 'password';
+                icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+            }
+        }
+
+        function setFormat(fmt) {
+            currentFormat = fmt;
+            const btnActive = "px-6 py-2 rounded-md text-sm font-bold bg-white shadow text-[#1a0b5e] transition";
+            const btnInactive = "px-6 py-2 rounded-md text-sm font-bold text-slate-500 hover:text-slate-800 transition";
+            document.getElementById('fmt-visual').className = fmt === 'visual' ? btnActive : btnInactive;
+            document.getElementById('fmt-html').className = fmt === 'html' ? btnActive : btnInactive;
+            document.getElementById('fmt-pdf').className = fmt === 'pdf' ? btnActive : btnInactive;
+            document.getElementById('container-visual').classList.add('hidden');
+            document.getElementById('container-html').classList.add('hidden');
+            document.getElementById('container-pdf').classList.add('hidden');
+            document.getElementById('container-' + fmt).classList.remove('hidden');
+            checkPreviewVisibility();
+        }
+
+        function previewNotice() {
+            const title = document.getElementById('n-title').value || 'Untitled Notice';
+            let content = currentFormat === 'visual' ? quill.root.innerHTML : document.getElementById('html-editor').value;
+            document.getElementById('preview-title').textContent = title;
+            // Defense in depth: sanitize here too, even though this is the
+            // admin's own draft content, so a pasted-in malicious snippet
+            // can't self-XSS the admin session before it's even saved.
+            document.getElementById('preview-content').innerHTML = window.sanitizeHtml ? window.sanitizeHtml(content) : '';
+            document.getElementById('preview-modal').classList.remove('hidden');
+        }
+
+        function closePreview() { document.getElementById('preview-modal').classList.add('hidden'); }
+
+        async function login() {
+            const btn = document.getElementById('login-btn');
+            btn.innerText = "Authenticating...";
+            const u = document.getElementById('username').value, p = document.getElementById('password').value;
+            // Turnstile token, if the widget is enabled (see the login form comment).
+            let turnstileToken = undefined;
+            if (window.turnstile) {
+                try { turnstileToken = window.turnstile.getResponse('turnstile-widget'); } catch (e) {}
+            }
+            try {
+                const res = await fetch('/api/auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: u, password: p, turnstileToken })
+                });
+                if(res.ok) { unlockUI(); } else { document.getElementById('login-error').classList.remove('hidden'); }
+            } catch(e) { alert("API Error"); }
+            btn.innerText = "LOGIN";
+        }
+
+        // Fix: the cookie is HttpOnly now, so it can't be cleared with
+        // document.cookie from here — logout has to be a real server call
+        // that deletes the session row and clears the cookie via Set-Cookie.
+        async function logout() {
+            try { await fetch('/api/logout', { method: 'POST' }); } catch (e) {}
+            location.reload();
+        }
+
+        function unlockUI() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('top-header').classList.remove('hidden');
+            
+            // 🔴 বাগ ফিক্সড: লগইনের পর সাইডবার নিশ্চিতভাবে হাইড থাকবে 🔴
+            document.getElementById('sidebar').classList.add('hidden');
+            document.getElementById('sidebar').classList.remove('flex');
+            
+            document.getElementById('main-content').classList.remove('hidden');
+            showDashboard();
+            fetchNotices();
+        }
+
+        function setActiveNav(id) {
+            document.getElementById('nav-dash').className = "w-full text-left px-4 py-3 rounded text-sm font-bold transition hover:bg-slate-800 text-slate-300";
+            document.getElementById('nav-notice').className = "w-full text-left px-4 py-3 rounded text-sm font-bold transition hover:bg-slate-800 text-slate-300";
+            document.getElementById(id).className = "w-full text-left px-4 py-3 rounded text-sm font-bold bg-blue-700 text-white transition shadow";
+        }
+
+        function showDashboard() {
+            setActiveNav('nav-dash');
+            document.getElementById('dashboard-view').classList.remove('hidden');
+            document.getElementById('notice-panel-view').classList.add('hidden');
+            document.getElementById('notice-editor-view').classList.add('hidden');
+        }
+
+        function showNoticePanel() {
+            setActiveNav('nav-notice');
+            document.getElementById('dashboard-view').classList.add('hidden');
+            document.getElementById('notice-panel-view').classList.remove('hidden');
+            document.getElementById('notice-editor-view').classList.add('hidden');
+            fetchNotices();
+        }
+
+        function showEditor(isEdit = false, id = null) {
+            document.getElementById('notice-panel-view').classList.add('hidden');
+            document.getElementById('notice-editor-view').classList.remove('hidden');
+            
+            document.getElementById('n-title').value = '';
+            quill.root.innerHTML = ''; document.getElementById('html-editor').value = '';
+            document.getElementById('auto-delete').checked = false;
+            document.getElementById('editor-timer-box').classList.add('hidden');
+            setTimerUI('ed', null);
+            document.getElementById('pdf-upload').value = '';
+            setFormat('visual');
+
+            if(isEdit) {
+                document.getElementById('editor-title').innerText = "Edit Notice";
+                document.getElementById('publish-btn').innerText = "Update Notice";
+                document.getElementById('edit-id').value = id;
+                const item = noticeData.find(x => x.id === id);
+                if(item) {
+                    document.getElementById('n-title').value = item.title;
+                    // Sanitize on load too: this content was written to the DB
+                    // at some point in the past — sanitizing again here is
+                    // cheap insurance against anything that slipped through
+                    // before this fix was deployed.
+                    const safeContent = window.sanitizeHtml ? window.sanitizeHtml(item.content || '') : (item.content || '');
+                    quill.root.innerHTML = safeContent;
+                    document.getElementById('html-editor').value = item.content;
+                    if(item.auto_delete_date) {
+                        document.getElementById('auto-delete').checked = true;
+                        document.getElementById('editor-timer-box').classList.remove('hidden');
+                        setTimerUI('ed', item.auto_delete_date);
+                    }
+                }
+            } else {
+                document.getElementById('editor-title').innerText = "Create Notice";
+                document.getElementById('publish-btn').innerText = "Publish Notice";
+                document.getElementById('edit-id').value = '';
+            }
+            checkPreviewVisibility();
+        }
+
+        async function fetchNotices() {
+            const tbody = document.getElementById('admin-notices');
+            tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center">Loading...</td></tr>';
+            try {
+                const res = await fetch('/api/notices');
+                noticeData = await res.json();
+                tbody.innerHTML = '';
+                if(noticeData.length === 0) { tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-slate-500">No data found.</td></tr>'; return; }
+                
+                noticeData.forEach(n => {
+                    // n.id comes straight from the DB (integer primary key),
+                    // safe to interpolate. n.title is admin-authored free
+                    // text and is NEVER interpolated into innerHTML/onclick
+                    // strings — it's set via textContent below instead.
+                    const id = parseInt(n.id, 10);
+                    const date = new Date(n.created_at).toLocaleDateString('en-GB');
+                    const timerBadge = n.auto_delete_date ? `<span class="bg-orange-100 text-orange-700 text-xs px-2 py-1 rounded font-bold border border-orange-200">Timer On</span>` : `<span class="text-slate-400 text-xs font-bold">No Timer</span>`;
+
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-50 border-b border-slate-100';
+                    tr.innerHTML = `
+                        <td class="p-4 font-bold text-slate-700"><span class="notice-title-cell"></span> <br><span class="text-xs text-slate-400 font-normal">Created: ${date}</span></td>
+                        <td class="p-4">${timerBadge}</td>
+                        <td class="p-4 text-center relative">
+                            <button type="button" onclick="toggleDrop(event, ${id})" class="text-slate-500 hover:text-[#1a0b5e] font-black px-2 py-1 text-xl focus:outline-none">&#8942;</button>
+                            <div id="drop-${id}" class="dropdown-menu hidden absolute right-12 top-2 w-36 bg-white shadow-xl border border-slate-200 rounded-lg text-left z-50 overflow-hidden">
+                                <button type="button" onclick="showEditor(true, ${id})" class="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-100 font-bold border-b border-slate-100">Edit Content</button>
+                                <button type="button" onclick="openTimerModal(${id})" class="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-100 font-bold border-b border-slate-100">Set Timer</button>
+                                <button type="button" onclick="openDeleteModal(${id})" class="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 font-bold">Delete</button>
+                            </div>
+                        </td>`;
+                    tr.querySelector('.notice-title-cell').textContent = n.title;
+                    tbody.appendChild(tr);
+                });
+            } catch(e) { tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-red-500 font-bold">System Error</td></tr>'; }
+        }
+
+        function toggleDrop(e, id) {
+            e.stopPropagation();
+            document.querySelectorAll('.dropdown-menu').forEach(m => { if(m.id !== 'drop-'+id) m.classList.add('hidden'); });
+            document.getElementById('drop-'+id).classList.toggle('hidden');
+        }
+
+        function closeAllDropdowns() { document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.add('hidden')); }
+
+        async function saveNotice() {
+            const title = document.getElementById('n-title').value;
+            if(!title) { alert('Title required!'); return; }
+            const editId = document.getElementById('edit-id').value;
+            
+            let content = '';
+            if(currentFormat === 'visual') content = quill.root.innerHTML;
+            else if (currentFormat === 'html') content = document.getElementById('html-editor').value;
+
+            let autoDel = null;
+            if(document.getElementById('auto-delete').checked) {
+                autoDel = getTimerISO('ed');
+                if(!autoDel) { alert('Please select a valid date for the timer.'); return; }
+            }
+
+            const btn = document.getElementById('publish-btn');
+            btn.innerText = "Processing...";
+
+            try {
+                let pdf_url = null;
+                if(editId) {
+                    const item = noticeData.find(x => x.id === parseInt(editId));
+                    if(item) pdf_url = item.pdf_url;
+                }
+
+                if(currentFormat === 'pdf') {
+                    const fileInput = document.getElementById('pdf-upload');
+                    if(fileInput.files.length > 0) {
+                        btn.innerText = "Uploading PDF to DB...";
+                        const fd = new FormData(); fd.append('file', fileInput.files[0]);
+                        const upRes = await fetch('/api/upload', { method: 'POST', body: fd });
+                        if(upRes.ok) { const upData = await upRes.json(); pdf_url = upData.file_url; }
+                    }
+                } else if (currentFormat === 'visual' || currentFormat === 'html') {
+                    btn.innerText = "Generating PDF...";
+                    const pdfTemplate = `<div style="padding:40px; font-family:sans-serif; color:#0f172a; font-size:16px; line-height:1.6;">${content}</div>`;
+                    
+                    const opt = { margin: 0, filename: 'notice.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } };
+                    const pdfBlob = await html2pdf().set(opt).from(pdfTemplate).output('blob');
+                    
+                    btn.innerText = "Saving to Object DB...";
+                    const fd = new FormData(); fd.append('file', pdfBlob, Date.now() + '_generated.pdf');
+                    const upRes = await fetch('/api/upload', { method: 'POST', body: fd });
+                    if(upRes.ok) { const upData = await upRes.json(); pdf_url = upData.file_url; }
+                }
+
+                btn.innerText = "Finalizing...";
+                let reqMethod = editId ? 'PUT' : 'POST';
+                let payload = { title, content, auto_delete_date: autoDel, pdf_url: pdf_url };
+                if(editId) payload.id = editId;
+
+                const res = await fetch('/api/notices', { method: reqMethod, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                if(res.ok) { showNoticePanel(); } else { alert('Database error.'); }
+            } catch(e) { alert('Connection Error!'); }
+        }
+
+        function openTimerModal(id) {
+            const item = noticeData.find(x => x.id === id);
+            document.getElementById('timer-id').value = id;
+            setTimerUI('qt', item.auto_delete_date);
+            document.getElementById('timer-modal').classList.remove('hidden');
+        }
+
+        function clearQuickTimer() { setTimerUI('qt', null); }
+
+        async function saveQuickTimer() {
+            const id = document.getElementById('timer-id').value;
+            const item = noticeData.find(x => x.id === parseInt(id));
+            const newDate = getTimerISO('qt');
+            const btn = document.getElementById('save-timer-btn');
+            btn.innerText = "Saving...";
+            const payload = { id: item.id, title: item.title, content: item.content, pdf_url: item.pdf_url, auto_delete_date: newDate };
+            await fetch('/api/notices', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            closeModals(); fetchNotices(); btn.innerText = "Save";
+        }
+
+        function openDeleteModal(id) {
+            document.getElementById('delete-id').value = id;
+            document.getElementById('delete-modal').classList.remove('hidden');
+        }
+        function closeModals() { 
+            document.getElementById('delete-modal').classList.add('hidden'); 
+            document.getElementById('timer-modal').classList.add('hidden');
+            closePreview();
+        }
+        async function confirmDelete() {
+            const id = document.getElementById('delete-id').value;
+            const btn = document.getElementById('confirm-del-btn');
+            btn.innerText = "Deleting...";
+            await fetch('/api/notices?id=' + id, { method: 'DELETE' });
+            closeModals(); fetchNotices();
+        }
+    </script>
+</body>
+</html>

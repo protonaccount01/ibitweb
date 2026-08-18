@@ -1,0 +1,34 @@
+# Reference template for the bindings/env vars this project needs.
+# Cloudflare Pages projects are usually configured via the Dashboard
+# (Settings -> Functions -> Bindings / Environment variables) rather than
+# a committed wrangler.toml, but keeping this file in the repo means the
+# required configuration is documented and version-controlled even if
+# nobody touches the project for years.
+#
+# If you do want to manage this project with `wrangler pages` commands,
+# rename this file to `wrangler.toml` and fill in the real values/IDs.
+
+name = "ibit-website"
+pages_build_output_dir = "."
+
+# --- D1 database binding (used as `env.DB` throughout functions/) ---
+[[d1_databases]]
+binding = "DB"
+database_name = "REPLACE_WITH_YOUR_D1_DATABASE_NAME"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+
+# --- R2 bucket binding (used as `env.BUCKET` for uploaded files) ---
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "REPLACE_WITH_YOUR_R2_BUCKET_NAME"
+
+# --- Environment variables (set these as "Secret"/encrypted in the Pages
+# dashboard, NOT here, if you use a wrangler.toml checked into git) ---
+#
+# ADMIN_USERNAME        - optional; enables env-var-based single-admin login
+#                          (see functions/api/auth.js). Skip this if you'd
+#                          rather manage admins via the D1 `users` table.
+# ADMIN_PASSWORD_HASH   - required if ADMIN_USERNAME is set. Generate with:
+#                            node scripts/hash-password.js "your-password"
+# TURNSTILE_SECRET_KEY  - optional; enables CAPTCHA on the login form.
+#                          Leave unset to skip CAPTCHA entirely.
