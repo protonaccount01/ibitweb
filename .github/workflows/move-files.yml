@@ -1,0 +1,34 @@
+name: Move Files to Root
+
+on:
+  workflow_dispatch: # GitHub er Actions tab theke manually run korar jonno
+
+jobs:
+  move-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Move Files from 'fixed' Folder to Root
+        run: |
+          # Hidden files (jemon .env, .gitignore) shoho shob file pawar jonno
+          shopt -s dotglob
+          
+          # 'fixed' folder er vitore thaka shob kichu root directory-te (.) move kora hocche
+          mv fixed/* .
+          
+          # faka 'fixed' folder ta delete kora hocche
+          rm -rf fixed
+
+      - name: Commit and Push Changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Shob change add kora hocche (notun jaygay file gulo asha ebong purono folder delete howa)
+          git add .
+          
+          git commit -m "Moved all files from 'fixed' folder to root" || echo "No changes to commit"
+          git push
