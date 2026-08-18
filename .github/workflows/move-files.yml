@@ -1,7 +1,16 @@
 name: Move Files to Root
 
 on:
-  workflow_dispatch: # GitHub er Actions tab theke manually run korar jonno
+  workflow_dispatch:
+    inputs:
+      source_folder:
+        description: 'Source folder name to move files from'
+        required: true
+        default: 'fixed'
+        type: string
+
+permissions:
+  contents: write
 
 jobs:
   move-and-push:
@@ -11,24 +20,28 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Move Files from 'fixed' Folder to Root
+      - name: Move Files to Root
         run: |
-          # Hidden files (jemon .env, .gitignore) shoho shob file pawar jonno
           shopt -s dotglob
+          SOURCE_DIR="${{ github.event.inputs.source_folder }}"
           
-          # 'fixed' folder er vitore thaka shob kichu root directory-te (.) move kora hocche
-          mv fixed/* .
-          
-          # faka 'fixed' folder ta delete kora hocche
-          rm -rf fixed
+          if [ -d "$SOURCE_DIR" ]; then
+            mv "$SOURCE_DIR"/* .
+            rm -rf "$SOURCE_DIR"
+          else
+            echo "Error: Directory '$SOURCE_DIR' does not exist."
+            exit 1
+          fi
 
       - name: Commit and Push Changes
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Moved all files from '${{ github.event.inputs.source_folder }}' to root"
+            git push
+          fi
           
-          # Shob change add kora hocche (notun jaygay file gulo asha ebong purono folder delete howa)
-          git add .
-          
-          git commit -m "Moved all files from 'fixed' folder to root" || echo "No changes to commit"
-          git push
