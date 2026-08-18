@@ -1,7 +1,7 @@
 name: Clean Repository (Keep .github only)
 
 on:
-  workflow_dispatch: # Actions ট্যাব থেকে ম্যানুয়ালি রান করার জন্য
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -14,11 +14,11 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Delete all files except .github
+      - name: Delete all files except .github and .git
         shell: bash
         run: |
           shopt -s extglob dotglob
-          rm -rf !(.github|.|..)
+          rm -rf !(.github|.git|.|..)
 
       - name: Commit and Push Changes
         run: |
@@ -31,3 +31,4 @@ jobs:
             git commit -m "chore: delete all files and folders except .github"
             git push
           fi
+          
