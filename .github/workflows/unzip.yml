@@ -1,0 +1,34 @@
+name: Unzip Code and Push
+
+on:
+  push:
+    paths:
+      - '**.zip' # Jokhon kono zip file push kora hobe tokhon ei action run korbe
+  workflow_dispatch: # Tumi chaile manually o run korte parbe
+
+jobs:
+  unzip-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Extract ZIP File
+        run: |
+          # Joto zip file ache shob unzip korbe ebong purono file overwrite korbe
+          unzip -o *.zip 
+          
+          # Unzip korar por zip file(s) delete kore dibe jate repo vari na hoy
+          rm *.zip
+
+      - name: Commit and Push Changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git add .
+          
+          # Jodi notun kono file na thake tahole commit korbe na
+          git commit -m "Auto-extracted zip file and updated repository" || echo "No changes to commit"
+          git push
