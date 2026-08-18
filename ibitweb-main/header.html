@@ -1,0 +1,89 @@
+<!-- Top Header -->
+<div class="bg-white py-2 md:py-3 px-4 md:px-6 border-b border-slate-200">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-4">
+        <img src="/assets/logo.jpeg" alt="IBIT Logo" class="w-10 h-10 md:w-14 md:h-14 rounded-full object-cover shadow-sm">
+        <div class="text-center md:text-left w-full">
+            <h1 class="text-[clamp(11px,3.5vw,16px)] sm:text-lg md:text-xl font-black text-[#1a0b5e] tracking-wide uppercase whitespace-nowrap w-full">
+                IBIT-ISLAMI BANK INSTITUTE OF TECHNOLOGY, SYLHET
+            </h1>
+            <p class="text-[9px] sm:text-[10px] md:text-xs font-semibold text-slate-500 whitespace-nowrap w-full">
+                ESTD: 2006 &nbsp;|&nbsp; Nawa Corner, Humayun Rashid Chattar, Sylhet
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Navigation Bar (Off-White Background, Beguni Text) -->
+<nav class="bg-[#f8f9fa] text-[#1a0b5e] shadow-md sticky top-0 z-50 border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 flex justify-end md:justify-center items-center">
+        <!-- Desktop Menu -->
+        <div class="hidden md:flex items-center space-x-1 text-[13px] font-bold tracking-wider">
+            <a href="/index.html" class="px-4 py-2.5 hover:bg-[#e2e8f0] hover:text-[#3b278f] transition rounded-md">HOME</a>
+            <a href="/pages/about.html" class="px-4 py-2.5 hover:bg-[#e2e8f0] hover:text-[#3b278f] transition rounded-md">ABOUT US</a>
+            <div class="relative group">
+                <button class="px-4 py-2.5 hover:bg-[#e2e8f0] hover:text-[#3b278f] flex items-center space-x-1 transition focus:outline-none rounded-md">
+                    <span>ADMINISTRATION</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div class="absolute left-0 w-56 bg-[#f8f9fa] text-[#1a0b5e] shadow-2xl py-2 hidden group-hover:block border-t-2 border-[#1a0b5e] rounded-b-md">
+                    <a href="/pages/administration/faculty-members.html" class="block px-4 py-2 text-xs font-bold hover:bg-[#e2e8f0] hover:text-[#3b278f] uppercase transition">FACULTY MEMBERS</a>
+                    <a href="/pages/administration/stuff.html" class="block px-4 py-2 text-xs font-bold hover:bg-[#e2e8f0] hover:text-[#3b278f] uppercase transition">STUFF</a>
+                </div>
+            </div>
+            <a href="/pages/contact.html" class="px-4 py-2.5 hover:bg-[#e2e8f0] hover:text-[#3b278f] transition rounded-md">CONTACT</a>
+            <div class="relative group">
+                <button class="px-4 py-2.5 hover:bg-[#e2e8f0] hover:text-[#3b278f] flex items-center space-x-1 transition focus:outline-none rounded-md">
+                    <span>DEPARTMENTS</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div class="absolute left-0 w-64 bg-[#f8f9fa] text-[#1a0b5e] shadow-2xl py-2 hidden group-hover:block border-t-2 border-[#1a0b5e] rounded-b-md">
+                    <a href="/pages/departments/computer-science-and-technology.html" class="block px-4 py-2 text-xs font-bold hover:bg-[#e2e8f0] hover:text-[#3b278f] uppercase transition">COMPUTER SCIENCE & TECHNOLOGY</a>
+                    <a href="/pages/departments/electrical-technology.html" class="block px-4 py-2 text-xs font-bold hover:bg-[#e2e8f0] hover:text-[#3b278f] uppercase transition">ELECTRICAL TECHNOLOGY</a>
+                    <a href="/pages/departments/civil-technology.html" class="block px-4 py-2 text-xs font-bold hover:bg-[#e2e8f0] hover:text-[#3b278f] uppercase transition">CIVIL TECHNOLOGY</a>
+                </div>
+            </div>
+            <a href="/pages/notice.html" class="px-4 py-2.5 hover:bg-[#e2e8f0] hover:text-[#3b278f] transition rounded-md">NOTICE</a>
+        </div>
+        
+        <!-- Mobile Menu Toggle Button -->
+        <button id="mobile-btn" onclick="document.getElementById('mobile-menu').classList.toggle('hidden');" class="md:hidden py-2 text-[#1a0b5e] font-black flex items-center gap-1.5 focus:outline-none text-sm tracking-wider">
+            MENU 
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
+    </div>
+    
+    <!-- Mobile Menu (Off-White Background) -->
+    <div id="mobile-menu" class="hidden md:hidden bg-[#f8f9fa] px-2 py-2 text-xs font-bold absolute w-full left-0 shadow-2xl border-t border-slate-200 max-h-[80vh] overflow-y-auto">
+        <a href="/index.html" class="block py-3 px-3 text-[#1a0b5e] hover:bg-[#e2e8f0] hover:text-[#3b278f] border-b border-slate-200 transition rounded-t-md">HOME</a>
+        <a href="/pages/about.html" class="block py-3 px-3 text-[#1a0b5e] hover:bg-[#e2e8f0] hover:text-[#3b278f] border-b border-slate-200 transition">ABOUT US</a>
+        
+        <!-- Administration Toggle -->
+        <div>
+            <button onclick="document.getElementById('mob-admin-menu').classList.toggle('hidden'); document.getElementById('mob-admin-menu').classList.toggle('flex'); document.getElementById('mob-admin-icon').classList.toggle('rotate-180');" class="w-full flex justify-between items-center py-3 px-3 text-[#1a0b5e] hover:bg-[#e2e8f0] hover:text-[#3b278f] border-b border-slate-200 focus:outline-none tracking-wider transition">
+                <span>ADMINISTRATION</span>
+                <svg id="mob-admin-icon" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
+            <div id="mob-admin-menu" class="hidden flex-col bg-[#f1f5f9]">
+                <a href="/pages/administration/faculty-members.html" class="block py-3 pl-8 pr-3 text-[#1a0b5e] hover:bg-[#e2e8f0] hover:text-[#3b278f] border-b border-slate-200 transition">- FACULTY MEMBERS</a>
+                <a href="/pages/administration/stuff.html" class="block py-3 pl-8 pr-3 text-[#1a0b5e] hover:bg-[#e2e8f0] hover:text-[#3b278f] border-b border-slate-200 transition">- STUFF</a>
+            </div>
+        </div>
+
+        <a href="/pages/contact.html" class="block py-3 px-3 text-[#1a0b5e] hover:bg-[#e2e8f0] hover:text-[#3b278f] border-b border-slate-200 transition">CONTACT</a>
+        
+        <!-- Departments Toggle -->
+        <div>
+            <button onclick="document.getElementById('mob-dept-menu').classList.toggle('hidden'); document.getElementById('mob-dept-menu').classList.toggle('flex'); document.getElementById('mob-dept-icon').classList.toggle('rotate-180');" class="w-full flex justify-between items-center py-3 px-3 text-[#1a0b5e] hover:bg-[#e2e8f0] hover:text-[#3b278f] border-b border-slate-200 focus:outline-none tracking-wider transition">
+                <span>DEPARTMENTS</span>
+                <svg id="mob-dept-icon" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
+            <div id="mob-dept-menu" class="hidden flex-col bg-[#f1f5f9]">
+                <a href="/pages/departments/computer-science-and-technology.html" class="block py-3 pl-8 pr-3 text-[#1a0b5e] hover:bg-[#e2e8f0] hover:text-[#3b278f] border-b border-slate-200 transition">- COMPUTER SCIENCE & TECHNOLOGY</a>
+                <a href="/pages/departments/electrical-technology.html" class="block py-3 pl-8 pr-3 text-[#1a0b5e] hover:bg-[#e2e8f0] hover:text-[#3b278f] border-b border-slate-200 transition">- ELECTRICAL TECHNOLOGY</a>
+                <a href="/pages/departments/civil-technology.html" class="block py-3 pl-8 pr-3 text-[#1a0b5e] hover:bg-[#e2e8f0] hover:text-[#3b278f] border-b border-slate-200 transition">- CIVIL TECHNOLOGY</a>
+            </div>
+        </div>
+
+        <a href="/pages/notice.html" class="block py-3 px-3 text-[#1a0b5e] hover:bg-[#e2e8f0] hover:text-[#3b278f] transition rounded-b-md">NOTICE BOARD</a>
+    </div>
+</nav>
