@@ -15,7 +15,7 @@
 
 <!-- Navigation Bar (Off-White Background, Beguni Text) -->
 <nav class="bg-[#f8f9fa] text-[#1a0b5e] shadow-md sticky top-0 z-50 border-b border-slate-200">
-    <div class="max-w-7xl mx-auto px-4 flex justify-end md:justify-center items-center">
+    <div class="max-w-7xl mx-auto px-4 flex justify-center items-center">
         <!-- Desktop Menu -->
         <div class="hidden md:flex items-center space-x-1 text-[13px] font-bold tracking-wider">
             <a href="/index.html" class="px-4 py-2.5 hover:bg-[#e2e8f0] hover:text-[#3b278f] transition rounded-md">HOME</a>
@@ -44,12 +44,14 @@
             </div>
             <a href="/pages/notice.html" class="px-4 py-2.5 hover:bg-[#e2e8f0] hover:text-[#3b278f] transition rounded-md">NOTICE</a>
         </div>
-        
-        <!-- Mobile Menu Toggle Button -->
-        <button id="mobile-btn" onclick="document.getElementById('mobile-menu').classList.toggle('hidden');" class="md:hidden py-2 text-[#1a0b5e] font-black flex items-center gap-1.5 focus:outline-none text-sm tracking-wider">
-            MENU 
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-        </button>
+
+        <!-- Mobile Menu Bar: "MENU" label on the far left, hamburger icon on the far right -->
+        <div class="w-full flex md:hidden justify-between items-center">
+            <span class="py-2 text-[#1a0b5e] font-black text-sm tracking-wider">MENU</span>
+            <button id="mobile-btn" class="py-2 text-[#1a0b5e] focus:outline-none" aria-label="Toggle menu">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+        </div>
     </div>
     
     <!-- Mobile Menu (Off-White Background) -->
@@ -86,4 +88,4 @@
 
         <a href="/pages/notice.html" class="block py-3 px-3 text-[#1a0b5e] hover:bg-[#e2e8f0] hover:text-[#3b278f] transition rounded-b-md">NOTICE BOARD</a>
     </div>
-</nav>
+                </nav>
