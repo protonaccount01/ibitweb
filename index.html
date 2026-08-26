@@ -7,48 +7,85 @@
     <link rel="icon" type="image/jpeg" href="/assets/logo.jpeg">
     <link rel="stylesheet" href="/assets/css/tailwind.css">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <style>
+        .slider-track { width: 100%; overflow: hidden; }
+        .slider-images {
+            display: flex;
+            width: max-content;
+            animation: slideLeftInfinite 28s linear infinite;
+        }
+        .slider-images .slider-img {
+            height: 320px;
+            width: auto;
+            object-fit: cover;
+            margin-right: 10px;
+            border-radius: 12px;
+            flex-shrink: 0;
+        }
+        @keyframes slideLeftInfinite {
+            0%   { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        @media (max-width: 768px) {
+            .slider-images .slider-img { height: 190px; }
+        }
+    </style>
 </head>
 <body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen overflow-x-hidden">
 
     <div id="header-placeholder"></div>
 
     <main class="w-full flex-grow pb-12">
-        <div class="w-full" data-aos="fade-in" data-aos-duration="1200">
-            <img src="assets/home/di1.jpeg" alt="Top Banner" class="w-full h-auto object-cover">
-        </div>
 
-        <section class="max-w-6xl mx-auto px-4 py-12 flex flex-col md:flex-row items-center gap-8" data-aos="fade-up" data-aos-duration="1000">
-            <div class="w-full md:w-1/2 order-2 md:order-1">
-                <img src="assets/home/di2.jpg" alt="Welcome Event" class="w-full rounded-2xl shadow-sm object-cover">
-            </div>
-            <div class="w-full md:w-1/2 order-1 md:order-2 overflow-hidden">
-                <div style="display: flex; flex-direction: column; justify-content: center; height: auto; text-align: center; padding: 10px 5px; font-family: Arial, sans-serif; box-sizing: border-box; width: 100%;">
-                    <h3 style="color: green; font-size: 30px; font-weight: bold; margin: 0 0 6px 0; line-height: 1.2;">Welcome!</h3>
-                    <h2 class="text-[#1a0b5e] text-[clamp(11px,3vw,18px)] md:text-[clamp(10px,3.3vw,18px)] font-bold mb-[15px] leading-[1.2] whitespace-nowrap overflow-hidden text-ellipsis w-full block">
-                        IBIT-ISLAMI BANK INSTITUTE OF TECHNOLOGY, SYLHET
-                    </h2>
-                    <p style="color: #111111; font-size: 13.5px; line-height: 1.6; font-weight: 500; margin: 0; text-align: justify; text-justify: inter-word; padding: 0 5px;">
-                        Islami Bank Institute of Technology (IBIT), Sylhet is a premier (Govt Approved & BTEB Affiliated) Polytechnic Institute managed by Islami Bank Foundation, dedicated to building highly skilled Engineers in various technical sectors. Established in 1999, IBIT Sylhet is a well-reputed institute for Diploma-in-Engineering education, practical technical training, professional skill development, and leadership excellence.
-                    </p>
+        <!-- Welcome heading -->
+        <section class="max-w-3xl mx-auto px-4 pt-10 pb-6 text-center" data-aos="fade-up" data-aos-duration="800">
+            <h3 class="text-emerald-600 text-2xl md:text-3xl font-extrabold mb-2">Welcome!</h3>
+            <h2 class="text-[#1a0b5e] text-[clamp(15px,4vw,26px)] font-black leading-snug uppercase tracking-wide">
+                IBIT-ISLAMI BANK INSTITUTE OF TECHNOLOGY, SYLHET
+            </h2>
+        </section>
+
+        <!-- Infinite right-to-left image slideshow -->
+        <section class="w-full overflow-hidden bg-slate-100 py-4" data-aos="fade-in" data-aos-duration="1000">
+            <div class="slider-track">
+                <div class="slider-images">
+                    <img src="/assets/home/di1.jpeg" alt="IBIT Campus" class="slider-img">
+                    <img src="/assets/home/di2.jpg" alt="IBIT Welcome Event" class="slider-img">
+                    <img src="/assets/home/di1.jpeg" alt="IBIT Campus" class="slider-img">
+                    <img src="/assets/home/di2.jpg" alt="IBIT Welcome Event" class="slider-img">
                 </div>
             </div>
         </section>
 
-        <section class="max-w-5xl mx-auto px-4 pb-8" data-aos="fade-up" data-aos-duration="1000">
-            <div class="bg-white border border-slate-200 rounded-lg p-6 shadow-sm">
-                <h2 class="text-xl font-bold text-[#1f2937] uppercase border-b-2 border-[#1f2937] pb-2 mb-4">NOTICE BOARD</h2>
-                <div id="latest-notices" class="space-y-3">
-                    <p class="text-slate-400 text-sm">Loading notices...</p>
+        <!-- Description -->
+        <section class="max-w-3xl mx-auto px-4 py-8" data-aos="fade-up" data-aos-duration="1000">
+            <p class="text-[#111111] text-[14.5px] md:text-[15px] leading-relaxed font-medium text-justify">
+                Islami Bank Institute of Technology (IBIT), Sylhet is a premier (Govt Approved & BTEB Affiliated) Polytechnic Institute managed by Islami Bank Foundation, dedicated to building highly skilled Engineers in various technical sectors. Established in 1999, IBIT Sylhet is a well-reputed institute for Diploma-in-Engineering education, practical technical training, professional skill development, and leadership excellence.
+            </p>
+        </section>
+
+        <!-- Notice Board (full width) -->
+        <section class="w-full px-3 sm:px-6 lg:px-10 py-6" data-aos="fade-up" data-aos-duration="1000">
+            <div class="bg-white border border-slate-200 rounded-2xl p-5 md:p-8 shadow-md">
+                <div class="flex items-center gap-3 border-b-2 border-[#1a0b5e] pb-3 mb-5">
+                    <svg class="w-6 h-6 text-[#1a0b5e] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                    <h2 class="text-lg md:text-2xl font-black text-[#1a0b5e] uppercase tracking-wide">Notice Board</h2>
+                </div>
+                <div id="latest-notices" class="divide-y divide-slate-100">
+                    <p class="text-slate-400 text-sm py-2">Loading notices...</p>
                 </div>
                 <div class="mt-6 text-center">
-                    <a href="pages/notice.html" class="inline-block bg-[#3b4c6b] hover:bg-[#1f2937] text-white font-bold text-sm px-6 py-2.5 rounded transition">VIEW ALL NOTICES</a>
+                    <a href="pages/notice.html" class="inline-block bg-gradient-to-r from-[#1a0b5e] to-[#3b278f] hover:opacity-90 text-white font-bold text-sm px-8 py-3 rounded-full shadow-md transition">
+                        VIEW ALL NOTICES
+                    </a>
                 </div>
             </div>
         </section>
 
-        <section class="max-w-5xl mx-auto px-4 space-y-8">
-            <div data-aos="fade-up" data-aos-duration="1000" style="width: 100%; background-color: #f9f9f9; font-family: Arial, sans-serif; border: 1px solid #ddd; box-sizing: border-box; margin: 10px 0;">
-                <div style="background-color: #001253; color: #ffffff; text-align: center; padding: 12px 10px; font-size: 20px; font-weight: 500; letter-spacing: 0.5px;">Message From The Principal</div>
+        <!-- Message From The Principal (full width, slim header bar) -->
+        <section class="w-full px-3 sm:px-6 lg:px-10 py-6" data-aos="fade-up" data-aos-duration="1000">
+            <div style="width: 100%; background-color: #f9f9f9; font-family: Arial, sans-serif; border: 1px solid #ddd; box-sizing: border-box; border-radius: 14px; overflow: hidden;" class="shadow-md">
+                <div style="background-color: #001253; color: #ffffff; text-align: center; padding: 6px 10px; font-size: 14px; font-weight: 600; letter-spacing: 0.5px;">Message From The Principal</div>
                 <div class="flex flex-col md:flex-row gap-5 p-5 items-center md:items-start overflow-hidden">
                     <div class="shrink-0 w-[180px]">
                         <img src="assets/home/principal.jpg" alt="Principal Image" style="width: 100%; height: auto; display: block; object-fit: cover; border: 1px solid #ccc;">
@@ -65,6 +102,9 @@
                     </div>
                 </div>
             </div>
+        </section>
+
+        <section class="max-w-5xl mx-auto px-4 space-y-8">
 
             <div data-aos="fade-up" data-aos-duration="1000" style="width: 100%; max-width: 1100px; margin: 30px auto; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center;">
                 <h2 style="color: #1a0b5e; font-size: 28px; font-weight: 800; text-transform: uppercase; margin-bottom: 35px; letter-spacing: 1px;">Our Technology</h2>
@@ -192,15 +232,15 @@
                     // attacker-controllable (via a notice), so this is what
                     // stops stored XSS from firing on the homepage.
                     const row = document.createElement('div');
-                    row.className = 'flex justify-between items-center border-b border-dashed border-slate-300 pb-3 mb-3 last:border-b-0 last:pb-0 last:mb-0';
+                    row.className = 'flex justify-between items-center gap-4 py-3 px-2 -mx-2 rounded-md hover:bg-slate-50 transition';
 
                     const link = document.createElement('a');
                     link.href = 'pages/notice.html';
-                    link.className = 'text-slate-800 text-sm font-medium hover:text-indigo-600 truncate pr-4';
+                    link.className = 'text-slate-700 text-sm font-semibold hover:text-[#1a0b5e] truncate pr-4 transition';
                     link.textContent = n.title;
 
                     const dateSpan = document.createElement('span');
-                    dateSpan.className = 'bg-slate-100 text-slate-500 text-[11px] px-2.5 py-1 rounded whitespace-nowrap';
+                    dateSpan.className = 'bg-[#eef0fa] text-[#1a0b5e] text-[11px] font-semibold px-3 py-1 rounded-full whitespace-nowrap';
                     dateSpan.textContent = formattedDate;
 
                     row.appendChild(link);
