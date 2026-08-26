@@ -7,7 +7,12 @@
     <link rel="icon" type="image/jpeg" href="/assets/logo.jpeg">
     <link rel="stylesheet" href="/assets/css/tailwind.css">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
+        .font-poppins { font-family: 'Poppins', 'Segoe UI', Arial, sans-serif; }
+
         .slider-track { width: 100%; overflow: hidden; }
         .slider-images {
             display: flex;
@@ -29,6 +34,16 @@
         @media (max-width: 768px) {
             .slider-images .slider-img { height: 190px; }
         }
+
+        /* Guaranteed entrance animation (plays on load, not scroll-dependent) */
+        .animate-fadein {
+            opacity: 0;
+            animation: fadeInUp 1s ease-out forwards;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(22px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen overflow-x-hidden">
@@ -38,9 +53,9 @@
     <main class="w-full flex-grow pb-12">
 
         <!-- Welcome heading -->
-        <section class="max-w-3xl mx-auto px-4 pt-10 pb-6 text-center" data-aos="fade-up" data-aos-duration="800">
-            <h3 class="text-emerald-600 text-2xl md:text-3xl font-extrabold mb-2">Welcome!</h3>
-            <h2 class="text-[#1a0b5e] text-[clamp(15px,4vw,26px)] font-black leading-snug uppercase tracking-wide">
+        <section class="max-w-5xl mx-auto px-4 pt-10 pb-6 text-center animate-fadein font-poppins">
+            <h3 class="text-[#3b278f] text-lg md:text-xl font-bold tracking-[3px] mb-2">WELCOME!</h3>
+            <h2 class="text-[#1a0b5e] text-[clamp(17px,3vw,34px)] font-black uppercase tracking-wide leading-snug md:whitespace-nowrap">
                 IBIT-ISLAMI BANK INSTITUTE OF TECHNOLOGY, SYLHET
             </h2>
         </section>
@@ -58,14 +73,14 @@
         </section>
 
         <!-- Description -->
-        <section class="max-w-3xl mx-auto px-4 py-8" data-aos="fade-up" data-aos-duration="1000">
-            <p class="text-[#111111] text-[14.5px] md:text-[15px] leading-relaxed font-medium text-justify">
+        <section class="w-full px-3 sm:px-6 lg:px-10 py-8 md:py-14 animate-fadein" style="animation-delay:0.15s;">
+            <p class="font-poppins max-w-5xl mx-auto text-[#1f2937] text-[14.5px] md:text-[19px] leading-relaxed md:leading-[1.9] font-medium text-justify md:text-center">
                 Islami Bank Institute of Technology (IBIT), Sylhet is a premier (Govt Approved & BTEB Affiliated) Polytechnic Institute managed by Islami Bank Foundation, dedicated to building highly skilled Engineers in various technical sectors. Established in 1999, IBIT Sylhet is a well-reputed institute for Diploma-in-Engineering education, practical technical training, professional skill development, and leadership excellence.
             </p>
         </section>
 
         <!-- Notice Board (full width) -->
-        <section class="w-full px-3 sm:px-6 lg:px-10 py-6" data-aos="fade-up" data-aos-duration="1000">
+        <section class="w-full px-3 sm:px-6 lg:px-10 py-6 font-poppins" data-aos="fade-up" data-aos-duration="1000">
             <div class="bg-white border border-slate-200 rounded-2xl p-5 md:p-8 shadow-md">
                 <div class="flex items-center gap-3 border-b-2 border-[#1a0b5e] pb-3 mb-5">
                     <svg class="w-6 h-6 text-[#1a0b5e] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
@@ -74,9 +89,10 @@
                 <div id="latest-notices" class="divide-y divide-slate-100">
                     <p class="text-slate-400 text-sm py-2">Loading notices...</p>
                 </div>
-                <div class="mt-6 text-center">
-                    <a href="pages/notice.html" class="inline-block bg-gradient-to-r from-[#1a0b5e] to-[#3b278f] hover:opacity-90 text-white font-bold text-sm px-8 py-3 rounded-full shadow-md transition">
-                        VIEW ALL NOTICES
+                <div class="mt-4 flex justify-center sm:justify-end">
+                    <a href="pages/notice.html" class="group inline-flex items-center gap-1 text-[#1a0b5e] font-semibold text-sm hover:text-[#3b278f] transition">
+                        View All Notices
+                        <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                     </a>
                 </div>
             </div>
