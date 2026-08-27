@@ -233,8 +233,8 @@ export function getClientIp(request) {
 // ---------- Turnstile (optional CAPTCHA, only enforced if secret is configured) ----------
 
 export async function verifyTurnstile(env, token, ip) {
-    if (!env.TURNSTILE_SECRET_KEY) return { ok: true };
-    if (!token) return { ok: false, errorCodes: ['missing-input-response'] };
+    if (!env.TURNSTILE_SECRET_KEY) return true; // not configured -> skip (documented in README)
+    if (!token) return false;
     try {
         const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
             method: 'POST',
@@ -242,9 +242,9 @@ export async function verifyTurnstile(env, token, ip) {
             body: JSON.stringify({ secret: env.TURNSTILE_SECRET_KEY, response: token, remoteip: ip }),
         });
         const data = await res.json();
-        return { ok: data.success === true, errorCodes: data['error-codes'] || [] };
+        return data.success === true;
     } catch (e) {
-        return { ok: false, errorCodes: ['internal-error'] };
+        return false;
     }
 }
 
