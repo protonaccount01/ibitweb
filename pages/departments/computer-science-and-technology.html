@@ -7,6 +7,29 @@
     <link rel="icon" type="image/jpeg" href="/assets/logo.jpeg">
     <link rel="stylesheet" href="/assets/css/tailwind.css">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <style>
+        .slider-track { width: 100%; overflow: hidden; }
+        .slider-images {
+            display: flex;
+            width: max-content;
+            animation: slideLeftInfinite 28s linear infinite;
+        }
+        .slider-images .slider-img {
+            height: 320px;
+            width: auto;
+            object-fit: cover;
+            margin-right: 10px;
+            border-radius: 12px;
+            flex-shrink: 0;
+        }
+        @keyframes slideLeftInfinite {
+            0%   { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        @media (max-width: 768px) {
+            .slider-images .slider-img { height: 190px; }
+        }
+    </style>
 </head>
 <body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen overflow-x-hidden">
 
@@ -19,6 +42,20 @@
             <h1 data-aos="fade-up" style="color: #1a0b5e; font-size: 28px; font-weight: 800; text-transform: uppercase; text-align: center; margin-bottom: 30px; border-bottom: 2px solid #1a0b5e; padding-bottom: 10px;">
                 Diploma in Computer Science and Technology
             </h1>
+
+            <!-- Infinite right-to-left image slideshow -->
+            <div data-aos="fade-in" data-aos-duration="1000" style="width: 100%; margin-bottom: 40px;">
+                <div class="slider-track">
+                    <div class="slider-images">
+                        <img src="/assets/dep/cst/i1.jpeg" alt="CST Department" class="slider-img">
+                        <img src="/assets/dep/cst/i2.jpeg" alt="CST Department" class="slider-img">
+                        <img src="/assets/dep/cst/i3.jpeg" alt="CST Department" class="slider-img">
+                        <img src="/assets/dep/cst/i1.jpeg" alt="CST Department" class="slider-img">
+                        <img src="/assets/dep/cst/i2.jpeg" alt="CST Department" class="slider-img">
+                        <img src="/assets/dep/cst/i3.jpeg" alt="CST Department" class="slider-img">
+                    </div>
+                </div>
+            </div>
             
             <p data-aos="fade-up" data-aos-delay="100" style="color: #333; font-size: 15.5px; line-height: 1.7; text-align: justify; margin-bottom: 40px;">
                 Department of Computer Science and Technology at IBIT was established and has become one of the institute's most active departments. It focuses on essential areas such as web development, programming, networking, multimedia and graphics, application software, and hardware troubleshooting. The department is committed to studying and analyzing problems in both traditional and modern technology. After finishing the program, students perform well in areas like web development, programming, creating Android apps, networking, multimedia and graphics, application software, and hardware troubleshooting.
