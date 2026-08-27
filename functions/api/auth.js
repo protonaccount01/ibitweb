@@ -63,14 +63,9 @@ export async function onRequestPost(context) {
     }
 
     // --- Optional CAPTCHA (no-op unless TURNSTILE_SECRET_KEY is configured) ---
-    const captcha = await verifyTurnstile(env, turnstileToken, ip);
-    if (!captcha.ok) {
-        // TEMP DEBUG: exposing errorCodes so the real Turnstile failure
-        // reason is visible in the Network tab response while
-        // troubleshooting. Remove the errorCodes field once login works
-        // (see chat note) — Cloudflare's own docs also warn not to leak
-        // internal error details to end users long-term.
-        return jsonResponse({ success: false, message: 'Captcha verification failed', errorCodes: captcha.errorCodes }, { status: 401 });
+    const captchaOk = await verifyTurnstile(env, turnstileToken, ip);
+    if (!captchaOk) {
+        return jsonResponse({ success: false, message: 'Captcha verification failed' }, { status: 401 });
     }
 
     const user = await lookupUser(env, username);
