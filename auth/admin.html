@@ -8,7 +8,6 @@
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="/assets/js/sanitize.js"></script>
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <style>
         .ql-toolbar button:hover::after, .ql-toolbar .ql-picker:hover::after {
             content: attr(title); position: absolute; top: -25px; left: 50%; transform: translateX(-50%);
@@ -51,13 +50,13 @@
                 </button>
             </div>
             <!--
-                Cloudflare Turnstile CAPTCHA — enabled.
-                Replace YOUR_TURNSTILE_SITE_KEY below with the site key from your
-                Cloudflare Turnstile dashboard, and set TURNSTILE_SECRET_KEY as an
-                encrypted environment variable on the Pages project (dashboard
-                config, not a repo file — see note below).
+                Optional CAPTCHA (Cloudflare Turnstile).
+                To enable: add <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+                to <head>, set data-sitekey below to your Turnstile site key, and set the
+                TURNSTILE_SECRET_KEY environment variable on the Pages project. Until a
+                sitekey is set, this renders nothing and /api/auth skips verification.
             -->
-            <div class="cf-turnstile mb-4" data-sitekey="0x4AAAAAAEW8D3QP7UJspwWw" id="turnstile-widget"></div>
+            <div class="cf-turnstile mb-4" data-sitekey="" id="turnstile-widget"></div>
 
             <button type="button" onclick="login()" id="login-btn" class="w-full bg-[#1a0b5e] text-white py-3 rounded font-bold hover:bg-blue-900 transition shadow-lg">LOGIN</button>
             <p id="login-error" class="text-red-500 mt-3 font-bold hidden">Invalid ID or Password</p>
@@ -390,7 +389,18 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username: u, password: p, turnstileToken })
                 });
-                if(res.ok) { unlockUI(); } else { document.getElementById('login-error').classList.remove('hidden'); }
+                if(res.ok) {
+                    unlockUI();
+                } else {
+                    document.getElementById('login-error').classList.remove('hidden');
+                    // Turnstile tokens are single-use: without resetting here,
+                    // the next login attempt would resend this same (already
+                    // consumed) token and always fail captcha verification,
+                    // even though the widget still visually shows success.
+                    if (window.turnstile) {
+                        try { window.turnstile.reset('turnstile-widget'); } catch (e) {}
+                    }
+                }
             } catch(e) { alert("API Error"); }
             btn.innerText = "LOGIN";
         }
