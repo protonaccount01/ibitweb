@@ -401,7 +401,8 @@
                 const res = await fetch('/api/auth', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: u, password: p, turnstileToken })
+                    body: JSON.stringify({ username: u, password: p, turnstileToken }),
+                    signal: AbortSignal.timeout(15000) // never let the button stay stuck forever
                 });
                 if(res.ok) {
                     unlockUI();
@@ -416,7 +417,7 @@
                         try { window.turnstile.reset(turnstileWidgetId); } catch (e) {}
                     }
                 }
-            } catch(e) { alert("API Error"); }
+            } catch(e) { alert(e && e.name === 'TimeoutError' ? "Request timed out. Please try again." : "API Error"); }
             btn.innerText = "LOGIN";
         }
 
