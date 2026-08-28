@@ -69,7 +69,7 @@
         // Fix: notices are kept in memory and referenced by id, instead of
         // being stringified into onclick="..." attributes. That old approach
         // meant a title/content containing a quote character could break out
-        // of the attribute and inject a new event handler — on top of the
+        // of the attribute and inject a new event handler — on top of 
         // innerHTML issue below. Building the DOM with textContent and
         // addEventListener removes both problems.
         let noticesById = {};
