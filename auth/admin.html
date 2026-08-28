@@ -393,6 +393,25 @@
                     setLoginButtonState(false);
                 }
             });
+
+            // Fallback: callback কোনো কারণে fire না করলেও, প্রতি 500ms এ
+            // সরাসরি widget থেকে response চেক করে বাটন enable করবে।
+            const pollInterval = setInterval(() => {
+                if (turnstileWidgetId === null || !window.turnstile) return;
+                try {
+                    const token = window.turnstile.getResponse(turnstileWidgetId);
+                    if (token && token !== currentTurnstileToken) {
+                        currentTurnstileToken = token;
+                        setLoginButtonState(true);
+                    } else if (!token && currentTurnstileToken) {
+                        currentTurnstileToken = '';
+                        setLoginButtonState(false);
+                    }
+                } catch (e) { /* widget not ready yet */ }
+            }, 500);
+
+            // 20 সেকেন্ডেও কিছু না হলে বাটন enable করে দাও (asset/network issue হলে
+            // অ্যাডমিন যেন চিরতরে আটকে না যায়)
             setTimeout(() => {
                 if (!currentTurnstileToken) setLoginButtonState(true);
             }, 20000);
