@@ -50,10 +50,16 @@
                     <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                 </button>
             </div>
-
+            <!--
+                Cloudflare Turnstile CAPTCHA — enabled.
+                Replace YOUR_TURNSTILE_SITE_KEY below with the site key from your
+                Cloudflare Turnstile dashboard, and set TURNSTILE_SECRET_KEY as an
+                encrypted environment variable on the Pages project (dashboard
+                config, not a repo file — see note below).
+            -->
             <div class="mb-4" id="turnstile-widget"></div>
 
-            <button type="button" onclick="login()" id="login-btn" disabled style="width:100%; background-color:#94a3b8; color:#ffffff; padding:12px 0; border-radius:6px; font-weight:bold; box-shadow:0 4px 6px rgba(0,0,0,0.1); cursor:not-allowed; border:none; transition:background-color 0.2s;">Complete the captcha above</button>
+            <button type="button" onclick="login()" id="login-btn" class="w-full bg-[#1a0b5e] text-white py-3 rounded font-bold hover:bg-blue-900 transition shadow-lg">LOGIN</button>
             <p id="login-error" class="text-red-500 mt-3 font-bold hidden">Invalid ID or Password</p>
         </div>
     </div>
@@ -246,6 +252,7 @@
             document.querySelectorAll('.time-min, .time-sec').forEach(el => el.innerHTML = mins);
         };
 
+        // 🔴 বাগ ফিক্সড: হ্যামবার্গার টগল ফাংশন 🔴
         function toggleSidebar() {
             const sb = document.getElementById('sidebar');
             if (sb.classList.contains('hidden')) {
@@ -258,20 +265,6 @@
         }
 
         function toggleAMPM(btn) { btn.innerText = btn.innerText === 'AM' ? 'PM' : 'AM'; }
-
-        function setLoginButtonState(enabled) {
-            const btn = document.getElementById('login-btn');
-            btn.disabled = !enabled;
-            if (enabled) {
-                btn.style.backgroundColor = '#1a0b5e';
-                btn.style.cursor = 'pointer';
-                btn.innerText = 'LOGIN';
-            } else {
-                btn.style.backgroundColor = '#94a3b8';
-                btn.style.cursor = 'not-allowed';
-                btn.innerText = 'Complete the captcha above';
-            }
-        }
 
         function checkPreviewVisibility() {
             const btn = document.getElementById('preview-btn');
@@ -323,12 +316,18 @@
             document.getElementById(prefix + '-ampm').innerText = ampm;
         }
         
+        // Fix: the old code read document.cookie directly, which meant
+        // anyone could type `document.cookie = "admin_auth=true"` in the
+        // console and unlock the UI themselves. The session cookie is
+        // HttpOnly now (not readable/writable from JS at all), so instead
+        // we ask the server whether the current request actually carries a
+        // valid, signed-in session.
         (async function checkExistingSession() {
             try {
                 const res = await fetch('/api/session');
                 const data = await res.json();
                 if (data.authenticated) unlockUI();
-            } catch (e) { }
+            } catch (e) { /* not logged in / network error -> stay on login screen */ }
         })();
 
         var quill = new Quill('#quill-editor', {
@@ -367,12 +366,19 @@
             const title = document.getElementById('n-title').value || 'Untitled Notice';
             let content = currentFormat === 'visual' ? quill.root.innerHTML : document.getElementById('html-editor').value;
             document.getElementById('preview-title').textContent = title;
+            // Defense in depth: sanitize here too, even though this is the
+            // admin's own draft content, so a pasted-in malicious snippet
+            // can't self-XSS the admin session before it's even saved.
             document.getElementById('preview-content').innerHTML = window.sanitizeHtml ? window.sanitizeHtml(content) : '';
             document.getElementById('preview-modal').classList.remove('hidden');
         }
 
         function closePreview() { document.getElementById('preview-modal').classList.add('hidden'); }
 
+        // --- Turnstile: explicit render + callback (more reliable than
+        // implicit auto-render — getResponse()/reset() by container id can
+        // silently fail to find the widget). The callback fires as soon as
+        // the challenge completes and hands us the token directly.
         let turnstileWidgetId = null;
         let currentTurnstileToken = '';
 
@@ -380,41 +386,10 @@
             if (!window.turnstile) return;
             turnstileWidgetId = window.turnstile.render('#turnstile-widget', {
                 sitekey: '0x4AAAAAAEW8D3QP7UJspwWw',
-                callback: function (token) {
-                    currentTurnstileToken = token;
-                    setLoginButtonState(true);
-                },
-                'error-callback': function () {
-                    currentTurnstileToken = '';
-                    setLoginButtonState(false);
-                },
-                'expired-callback': function () {
-                    currentTurnstileToken = '';
-                    setLoginButtonState(false);
-                }
+                callback: function (token) { currentTurnstileToken = token; },
+                'error-callback': function () { currentTurnstileToken = ''; },
+                'expired-callback': function () { currentTurnstileToken = ''; }
             });
-
-            // Fallback: callback কোনো কারণে fire না করলেও, প্রতি 500ms এ
-            // সরাসরি widget থেকে response চেক করে বাটন enable করবে।
-            const pollInterval = setInterval(() => {
-                if (turnstileWidgetId === null || !window.turnstile) return;
-                try {
-                    const token = window.turnstile.getResponse(turnstileWidgetId);
-                    if (token && token !== currentTurnstileToken) {
-                        currentTurnstileToken = token;
-                        setLoginButtonState(true);
-                    } else if (!token && currentTurnstileToken) {
-                        currentTurnstileToken = '';
-                        setLoginButtonState(false);
-                    }
-                } catch (e) { /* widget not ready yet */ }
-            }, 500);
-
-            // 20 সেকেন্ডেও কিছু না হলে বাটন enable করে দাও (asset/network issue হলে
-            // অ্যাডমিন যেন চিরতরে আটকে না যায়)
-            setTimeout(() => {
-                if (!currentTurnstileToken) setLoginButtonState(true);
-            }, 20000);
         }
 
         async function login() {
@@ -427,25 +402,28 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username: u, password: p, turnstileToken }),
-                    signal: AbortSignal.timeout(15000)
+                    signal: AbortSignal.timeout(15000) // never let the button stay stuck forever
                 });
                 if(res.ok) {
                     unlockUI();
                 } else {
                     document.getElementById('login-error').classList.remove('hidden');
+                    // Turnstile tokens are single-use: without resetting here,
+                    // the next login attempt would resend this same (already
+                    // consumed) token and always fail captcha verification,
+                    // even though the widget still visually shows success.
                     currentTurnstileToken = '';
-                    setLoginButtonState(false);
                     if (window.turnstile && turnstileWidgetId !== null) {
                         try { window.turnstile.reset(turnstileWidgetId); } catch (e) {}
                     }
                 }
-            } catch(e) { 
-                alert(e && e.name === 'TimeoutError' ? "Request timed out. Please try again." : "API Error"); 
-                if (currentTurnstileToken) setLoginButtonState(true);
-                else setLoginButtonState(false);
-            }
+            } catch(e) { alert(e && e.name === 'TimeoutError' ? "Request timed out. Please try again." : "API Error"); }
+            btn.innerText = "LOGIN";
         }
 
+        // Fix: the cookie is HttpOnly now, so it can't be cleared with
+        // document.cookie from here — logout has to be a real server call
+        // that deletes the session row and clears the cookie via Set-Cookie.
         async function logout() {
             try { await fetch('/api/logout', { method: 'POST' }); } catch (e) {}
             location.reload();
@@ -454,8 +432,11 @@
         function unlockUI() {
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('top-header').classList.remove('hidden');
+            
+            // 🔴 বাগ ফিক্সড: লগইনের পর সাইডবার নিশ্চিতভাবে হাইড থাকবে 🔴
             document.getElementById('sidebar').classList.add('hidden');
             document.getElementById('sidebar').classList.remove('flex');
+            
             document.getElementById('main-content').classList.remove('hidden');
             showDashboard();
             fetchNotices();
@@ -501,6 +482,10 @@
                 const item = noticeData.find(x => x.id === id);
                 if(item) {
                     document.getElementById('n-title').value = item.title;
+                    // Sanitize on load too: this content was written to the DB
+                    // at some point in the past — sanitizing again here is
+                    // cheap insurance against anything that slipped through
+                    // before this fix was deployed.
                     const safeContent = window.sanitizeHtml ? window.sanitizeHtml(item.content || '') : (item.content || '');
                     quill.root.innerHTML = safeContent;
                     document.getElementById('html-editor').value = item.content;
@@ -528,6 +513,10 @@
                 if(noticeData.length === 0) { tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-slate-500">No data found.</td></tr>'; return; }
                 
                 noticeData.forEach(n => {
+                    // n.id comes straight from the DB (integer primary key),
+                    // safe to interpolate. n.title is admin-authored free
+                    // text and is NEVER interpolated into innerHTML/onclick
+                    // strings — it's set via textContent below instead.
                     const id = parseInt(n.id, 10);
                     const date = new Date(n.created_at).toLocaleDateString('en-GB');
                     const timerBadge = n.auto_delete_date ? `<span class="bg-orange-100 text-orange-700 text-xs px-2 py-1 rounded font-bold border border-orange-200">Timer On</span>` : `<span class="text-slate-400 text-xs font-bold">No Timer</span>`;
