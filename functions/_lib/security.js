@@ -232,51 +232,19 @@ export function getClientIp(request) {
 
 // ---------- Turnstile (optional CAPTCHA, only enforced if secret is configured) ----------
 
-// TEMPORARY DEBUG HELPER — remove this function and its call sites once the
-// captcha issue is diagnosed. Sends a small, secret-masked debug message to
-// a Telegram chat via the Bot API. No-ops silently if the two env vars
-// below aren't set, so it's safe to deploy even before you've configured
-// them.
-async function debugToTelegram(env, message) {
-    if (!env.TELEGRAM_BOT_TOKEN || !env.TELEGRAM_CHAT_ID) return;
-    try {
-        await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chat_id: env.TELEGRAM_CHAT_ID, text: message }),
-        });
-    } catch (e) {
-        // never let debug notification break the actual request
-    }
-}
-
 export async function verifyTurnstile(env, token, ip) {
     if (!env.TURNSTILE_SECRET_KEY) return true; // not configured -> skip (documented in README)
-    if (!token) {
-        await debugToTelegram(env, `Turnstile debug: no token received from client (ip=${ip})`);
-        return false;
-    }
+    if (!token) return false;
     try {
         const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ secret: env.TURNSTILE_SECRET_KEY, response: token, remoteip: ip }),
+            signal: AbortSignal.timeout(8000), // never let a hung network call stall login forever
         });
         const data = await res.json();
-        if (data.success !== true) {
-            const secretTail = env.TURNSTILE_SECRET_KEY.slice(-4);
-            await debugToTelegram(
-                env,
-                `Turnstile verification failed\n` +
-                `error-codes: ${JSON.stringify(data['error-codes'] || [])}\n` +
-                `hostname (per Cloudflare): ${data.hostname || 'n/a'}\n` +
-                `secret key used (last 4 chars): ...${secretTail}\n` +
-                `ip: ${ip}`
-            );
-        }
         return data.success === true;
     } catch (e) {
-        await debugToTelegram(env, `Turnstile debug: siteverify fetch threw: ${e.message}`);
         return false;
     }
 }
