@@ -59,7 +59,7 @@
             -->
             <div class="mb-4" id="turnstile-widget"></div>
 
-            <button type="button" onclick="login()" id="login-btn" class="w-full bg-[#1a0b5e] text-white py-3 rounded font-bold hover:bg-blue-900 transition shadow-lg">LOGIN</button>
+            <button type="button" onclick="login()" id="login-btn" disabled class="w-full bg-slate-300 text-slate-500 py-3 rounded font-bold shadow-lg cursor-not-allowed transition">LOGIN</button>
             <p id="login-error" class="text-red-500 mt-3 font-bold hidden">Invalid ID or Password</p>
         </div>
     </div>
@@ -397,13 +397,27 @@
         let turnstileWidgetId = null;
         let currentTurnstileToken = '';
 
+        // UI cue: keep the LOGIN button greyed out and unclickable until the
+        // Turnstile captcha actually reports success, then light it up. Also
+        // re-grey it if the token errors out or expires while sitting on
+        // the login screen (a token can expire after a few minutes if the
+        // admin solves the captcha then waits before clicking LOGIN).
+        const LOGIN_BTN_ACTIVE = "w-full bg-[#1a0b5e] text-white py-3 rounded font-bold hover:bg-blue-900 transition shadow-lg";
+        const LOGIN_BTN_DISABLED = "w-full bg-slate-300 text-slate-500 py-3 rounded font-bold shadow-lg cursor-not-allowed transition";
+        function setLoginButtonEnabled(enabled) {
+            const btn = document.getElementById('login-btn');
+            if (!btn) return;
+            btn.disabled = !enabled;
+            btn.className = enabled ? LOGIN_BTN_ACTIVE : LOGIN_BTN_DISABLED;
+        }
+
         function onTurnstileApiLoad() {
             if (!window.turnstile) return;
             turnstileWidgetId = window.turnstile.render('#turnstile-widget', {
                 sitekey: '0x4AAAAAAEW8D3QP7UJspwWw',
-                callback: function (token) { currentTurnstileToken = token; },
-                'error-callback': function () { currentTurnstileToken = ''; },
-                'expired-callback': function () { currentTurnstileToken = ''; }
+                callback: function (token) { currentTurnstileToken = token; setLoginButtonEnabled(true); },
+                'error-callback': function () { currentTurnstileToken = ''; setLoginButtonEnabled(false); },
+                'expired-callback': function () { currentTurnstileToken = ''; setLoginButtonEnabled(false); }
             });
         }
 
@@ -428,6 +442,7 @@
                     // consumed) token and always fail captcha verification,
                     // even though the widget still visually shows success.
                     currentTurnstileToken = '';
+                    setLoginButtonEnabled(false);
                     if (window.turnstile && turnstileWidgetId !== null) {
                         try { window.turnstile.reset(turnstileWidgetId); } catch (e) {}
                     }
