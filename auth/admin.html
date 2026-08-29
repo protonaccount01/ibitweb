@@ -330,11 +330,26 @@
             } catch (e) { /* not logged in / network error -> stay on login screen */ }
         })();
 
-        var quill = new Quill('#quill-editor', {
-            theme: 'snow',
-            modules: { toolbar: [ [{ 'header': [1,2,3,false] }], ['bold', 'italic', 'underline', 'strike'], [{'color':[]}, {'background':[]}], [{ 'list': 'ordered'}, { 'list': 'bullet' }], [{ 'align': [] }], ['link', 'image', 'video'], ['clean'] ] }
-        });
-        quill.on('text-change', function() { checkPreviewVisibility(); });
+        // Fix: if the Quill CDN script ever fails to load (blocked by CSP,
+        // network hiccup, ad-blocker, etc.) this used to throw an uncaught
+        // ReferenceError right here, which aborted the rest of this <script>
+        // block entirely — including the `let turnstileWidgetId` /
+        // `let currentTurnstileToken` declarations further down. Those
+        // never got initialized, so Turnstile and login() would then throw
+        // "Cannot access ... before initialization" and the login button
+        // got stuck on "Authenticating...". Wrapping this in try/catch keeps
+        // a Quill failure isolated to the visual notice editor instead of
+        // breaking the whole admin panel including login.
+        var quill = null;
+        try {
+            quill = new Quill('#quill-editor', {
+                theme: 'snow',
+                modules: { toolbar: [ [{ 'header': [1,2,3,false] }], ['bold', 'italic', 'underline', 'strike'], [{'color':[]}, {'background':[]}], [{ 'list': 'ordered'}, { 'list': 'bullet' }], [{ 'align': [] }], ['link', 'image', 'video'], ['clean'] ] }
+            });
+            quill.on('text-change', function() { checkPreviewVisibility(); });
+        } catch (e) {
+            console.error('Quill failed to load — visual notice editor unavailable:', e);
+        }
 
         function togglePassword() {
             const pwd = document.getElementById('password');
